@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1960e1b300142a4291ea454f0f7f42e, type: 3}
+  m_Name: Ocultista_RitualProibido
+  m_EditorClassIdentifier: Assembly-CSharp::BelleEpoque.SkillDefinition
+  displayName: Ritual Proibido
+  description: Poder imenso ao custo de 10 de Sanidade. Pode atordoar.
+  icon: {fileID: 0}
+  circulo: 2
+  kind: 0
+  element: 2
+  target: 0
+  resolution: 1
+  testAttribute: 2
+  testBonus: 5
+  resistAttribute: 5
+  critMargin: 20
+  diceCount: 4
+  diceSides: 8
+  power: 0
+  damageAttribute: 3
+  sanityDamage: 0
+  peCost: 3
+  hpCost: 0
+  sanityCost: 10
+  isItem: 0
+  appliesStatus: 1
+  status: 1
+  statusChance: 0.5
+  statusDuration: 1
+  animationTrigger: Cast
+  moveToTarget: 0
+  castVfx: {fileID: 0}
+  hitVfx: {fileID: 0}
+  castSfx: {fileID: 0}
+  hitSfx: {fileID: 0}
+  cameraShake: 0.55

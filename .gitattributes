@@ -1,0 +1,37 @@
+# Normaliza finais de linha entre Windows, Mac e Linux
+* text=auto
+
+# Código e texto
+*.cs         text diff=csharp
+*.shader     text
+*.hlsl       text
+*.json       text
+*.md         text
+*.txt        text
+*.asmdef     text
+*.uss        text
+*.uxml       text
+
+# Arquivos YAML da Unity: sempre LF e merge como texto
+*.unity      text eol=lf merge=unityyamlmerge
+*.prefab     text eol=lf merge=unityyamlmerge
+*.asset      text eol=lf merge=unityyamlmerge
+*.mat        text eol=lf merge=unityyamlmerge
+*.meta       text eol=lf
+*.controller text eol=lf merge=unityyamlmerge
+*.anim       text eol=lf merge=unityyamlmerge
+*.physicMaterial text eol=lf merge=unityyamlmerge
+*.inputactions text eol=lf
+
+# Binários (nunca mexer em finais de linha)
+*.ttf    binary
+*.otf    binary
+*.png    binary
+*.jpg    binary
+*.psd    binary
+*.fbx    binary
+*.blend  binary
+*.wav    binary
+*.mp3    binary
+*.ogg    binary
+*.mp4    binary

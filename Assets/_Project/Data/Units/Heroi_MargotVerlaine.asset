@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6edd6c9b7d9d9914a9ce045666094259, type: 3}
+  m_Name: Heroi_MargotVerlaine
+  m_EditorClassIdentifier: Assembly-CSharp::BelleEpoque.UnitDefinition
+  displayName: Margot Verlaine
+  roleName: Ocultista
+  lore: "Acad\xEAmica da Sorbonne expulsa por estudar livros que n\xE3o deveriam existir."
+  portrait: {fileID: 0}
+  themeColor: {r: 0.45, g: 0.25, b: 0.65, a: 1}
+  trilha: 2
+  nex: 35
+  atributos:
+    Agi: 2
+    For: 0
+    Int: 4
+    Pre: 3
+    Vig: 1
+  bonusDefesa: 0
+  bonusPv: 0
+  bonusPe: 0
+  bonusSanidade: 0
+  iniciativaBonus: 0
+  resistenciaBonus: 5
+  stats:
+    MaxHp: 40
+    MaxPe: 10
+    MaxSanity: 0
+    Defesa: 14
+    PePorRodada: 5
+    Atributos:
+      Agi: 1
+      For: 1
+      Int: 1
+      Pre: 1
+      Vig: 1
+    IniciativaBonus: 0
+    ResistenciaBonus: 0
+  weaknesses: 01000000i
+  resistances: 
+  basicAttack: {fileID: 11400000, guid: db32eb439b82399499258e9b908343dc, type: 2}
+  skills:
+  - {fileID: 11400000, guid: 15c55eb794a56ca438fc9345ce8f9fe5, type: 2}
+  - {fileID: 11400000, guid: d6a3b81e14c754843a46512f5d5137b6, type: 2}
+  - {fileID: 11400000, guid: e2bd02bd786085744834bbcc42d31d0a, type: 2}
+  - {fileID: 11400000, guid: cc39a3a24573a524c9e375cf72197bdb, type: 2}
+  modelPrefab: {fileID: 9025988903701023353, guid: b196dc23525bc17458d048caeb77a2bb, type: 3}
+  modelScale: 1
+  hurtSfx: {fileID: 0}
+  deathSfx: {fileID: 0}

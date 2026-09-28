@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6edd6c9b7d9d9914a9ce045666094259, type: 3}
+  m_Name: Heroi_IrmaCeleste
+  m_EditorClassIdentifier: Assembly-CSharp::BelleEpoque.UnitDefinition
+  displayName: "Irm\xE3 C\xE9leste"
+  roleName: "Especialista \xB7 M\xE9dico de Campo"
+  lore: "Freira do H\xF4tel-Dieu. Suas preces funcionam \u2014 e ela tem medo de descobrir por qu\xEA."
+  portrait: {fileID: 0}
+  themeColor: {r: 0.9, g: 0.85, b: 0.7, a: 1}
+  trilha: 1
+  nex: 35
+  atributos:
+    Agi: 2
+    For: 1
+    Int: 3
+    Pre: 2
+    Vig: 2
+  bonusDefesa: 2
+  bonusPv: 0
+  bonusPe: 0
+  bonusSanidade: 0
+  iniciativaBonus: 0
+  resistenciaBonus: 5
+  stats:
+    MaxHp: 40
+    MaxPe: 10
+    MaxSanity: 0
+    Defesa: 14
+    PePorRodada: 5
+    Atributos:
+      Agi: 1
+      For: 1
+      Int: 1
+      Pre: 1
+      Vig: 1
+    IniciativaBonus: 0
+    ResistenciaBonus: 0
+  weaknesses: 02000000i
+  resistances: 
+  basicAttack: {fileID: 11400000, guid: d32e0e169a5a8724ebdb2ceb6f508f12, type: 2}
+  skills:
+  - {fileID: 11400000, guid: 6883e24ac357ab34b833bc583efdf185, type: 2}
+  - {fileID: 11400000, guid: 98b91b55ad76b6345b563c6b761e04a8, type: 2}
+  - {fileID: 11400000, guid: c247f9d54e4d4504683d8bce22a4950c, type: 2}
+  - {fileID: 11400000, guid: 92139f1039bf92b49bfd691c4e693e16, type: 2}
+  modelPrefab: {fileID: 5104794398818058025, guid: 6a7437e24c3b68f4aa59130111d53e63, type: 3}
+  modelScale: 1
+  hurtSfx: {fileID: 0}
+  deathSfx: {fileID: 0}

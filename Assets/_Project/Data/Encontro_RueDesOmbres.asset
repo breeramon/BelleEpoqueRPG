@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc927890b3f40f449863b2749d57d37c, type: 3}
+  m_Name: Encontro_RueDesOmbres
+  m_EditorClassIdentifier: Assembly-CSharp::BelleEpoque.EncounterDefinition
+  title: Rue des Ombres
+  heroes:
+  - {fileID: 11400000, guid: 1ba46b30682676f459f63f476a3e99f3, type: 2}
+  - {fileID: 11400000, guid: 730737dac935abb458708668ca472634, type: 2}
+  - {fileID: 11400000, guid: 7341f6643d2974b4f985c5cd1da16d7c, type: 2}
+  enemies:
+  - {fileID: 11400000, guid: 6bc05df477d5eb54c88212f35e8507a0, type: 2}
+  - {fileID: 11400000, guid: c55a095a1887061488a493853a59b413, type: 2}
+  - {fileID: 11400000, guid: ef13e482c28acb040a8f7719b82c7c6e, type: 2}
+  items:
+  - item: {fileID: 11400000, guid: 77098dca874fbad45be15ddee395a003, type: 2}
+    quantity: 3
+  - item: {fileID: 11400000, guid: 10517a63859870c4982a3e7bba52f455, type: 2}
+    quantity: 2
+  battleMusic: {fileID: 0}
+  ambienceLoop: {fileID: 0}
+  victoryStinger: {fileID: 0}
+  defeatStinger: {fileID: 0}
