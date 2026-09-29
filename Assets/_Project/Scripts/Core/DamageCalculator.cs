@@ -30,7 +30,7 @@ namespace BelleEpoque.Core
             }
         }
 
-        /// <summary>Teste de ataque: Xd20 (X = atributo − penalidade de Sanidade) + bônus contra a Defesa.</summary>
+        //Teste de ataque: Xd20 (X = atributo − penalidade de Sanidade) + bônus contra a Defesa.
         public static HitResult ResolveAttack(BattleUnit attacker, BattleUnit target, SkillData skill, IRandom rng)
         {
             int dice = attacker.Attr(skill.TestAttribute) - attacker.SanityDicePenalty;

@@ -295,6 +295,14 @@ namespace BelleEpoque
             return root;
         }
 
+        /// <summary>Descrição da classe: o "roleName" da ficha (ex.: Especialista · Médico de Campo) ou a trilha.</summary>
+        private static string ClassLabel(BattleUnit u)
+        {
+            var def = u.Tag as UnitDefinition;
+            string label = def != null && !string.IsNullOrWhiteSpace(def.roleName) ? def.roleName : UnitDefinition.TrilhaName(u.Trilha);
+            return label.ToUpperInvariant();
+        }
+
         private static string Initial(string name)
         {
             if (string.IsNullOrEmpty(name)) return "?";
@@ -309,9 +317,13 @@ namespace BelleEpoque
         private void BuildParty()
         {
             var veil = UIFactory.CreatePanel(transform, "VeuFichas", new Color(T.nuit.r, T.nuit.g, T.nuit.b, 0.85f), false, UIFactory.FadeSprite(UIFactory.Fade.Up));
-            UIFactory.Place(veil.rectTransform, new Vector2(0.4f, 0), new Vector2(1, 0), new Vector2(0.5f, 0), Vector2.zero, new Vector2(0, 230));
+            UIFactory.Place(veil.rectTransform, new Vector2(0.4f, 0), new Vector2(1, 0), new Vector2(0.5f, 0), Vector2.zero, new Vector2(0, 235));
 
-            float w = 226f, h = 158f, gap = 14f;
+            // Cabeçalho: retrato à esquerda; à direita dele o nome e, logo abaixo, trilha / NEX / DEF
+            const float P = 56f;            // tamanho do retrato
+            const float TX = P + 10f;       // onde começa o texto ao lado do retrato
+            const float Top = P + 8f;      // onde começa o bloco de PV
+            float w = 230f, h = Top + 94f, gap = 12f;
             int n = _battle.Heroes.Count;
             for (int i = 0; i < n; i++)
             {
@@ -326,30 +338,43 @@ namespace BelleEpoque
                 var line = UIFactory.CreateRule(c.Root, "Filete", new Color(T.dore.r, T.dore.g, T.dore.b, 0.45f), 1.5f);
                 UIFactory.Place(line.rectTransform, new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 0), new Vector2(0, -6), new Vector2(0, 1.5f));
 
-                var portrait = Portrait(c.Root, u, 58, false);
-                UIFactory.Place(portrait, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 0), new Vector2(58, 58));
+                // Retrato (inicial por enquanto; troca sozinho pela foto quando o UnitDefinition tiver "portrait")
+                var portrait = Portrait(c.Root, u, P, false);
+                UIFactory.Place(portrait, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 0), new Vector2(P, P));
                 c.Ring = portrait.Find("Aro").GetComponent<UnityEngine.UI.Image>();
 
-                c.Name = UIFactory.CreateText(c.Root, "Nome", u.Name, T.Display, 21, T.toile);
-                UIFactory.Place(c.Name.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(66, -2), new Vector2(w - 66, 28));
-                c.Sub = UIFactory.CreateText(c.Root, "Trilha", "", T.Label, 15, T.cendre, TextAlignmentOptions.Left, 3);
-                UIFactory.Place(c.Sub.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(66, -30), new Vector2(w - 66, 20));
+                // Nome ao lado do retrato; diminui sozinho se for comprido, nunca é cortado
+                c.Name = UIFactory.CreateText(c.Root, "Nome", u.Name, T.Display, 20, T.toile, TextAlignmentOptions.BottomLeft);
+                c.Name.overflowMode = TextOverflowModes.Overflow;
+                c.Name.enableAutoSizing = true;
+                c.Name.fontSizeMin = 12;
+                c.Name.fontSizeMax = 20;
+                UIFactory.Place(c.Name.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(TX, -1), new Vector2(w - TX, 25));
 
-                var pvLabel = UIFactory.CreateText(c.Root, "PVRotulo", "PV", T.Label, 17, T.pv, TextAlignmentOptions.Left, 3);
-                UIFactory.Place(pvLabel.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -66), new Vector2(40, 30));
-                c.PvText = UIFactory.CreateText(c.Root, "PV", "", T.Label, 32, T.toile, TextAlignmentOptions.Right, 1);
-                UIFactory.Place(c.PvText.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(40, -60), new Vector2(w - 40, 36));
-                c.Pv = SmallBar(c.Root, T.pv, 0, -98, w, 6);
+                // Abaixo do nome: trilha na 1ª linha, NEX e Defesa na 2ª
+                c.Sub = UIFactory.CreateText(c.Root, "Trilha", "", T.Label, 14, T.cendre, TextAlignmentOptions.TopLeft, 2);
+                c.Sub.overflowMode = TextOverflowModes.Overflow;
+                c.Sub.lineSpacing = -8;
+                c.Sub.enableAutoSizing = true;
+                c.Sub.fontSizeMin = 9;
+                c.Sub.fontSizeMax = 14;
+                UIFactory.Place(c.Sub.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(TX, -27), new Vector2(w - TX, 32));
+
+                var pvLabel = UIFactory.CreateText(c.Root, "PVRotulo", "PV", T.Label, 16, T.pv, TextAlignmentOptions.Left, 3);
+                UIFactory.Place(pvLabel.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -Top - 6), new Vector2(40, 30));
+                c.PvText = UIFactory.CreateText(c.Root, "PV", "", T.Label, 28, T.toile, TextAlignmentOptions.Right, 1);
+                UIFactory.Place(c.PvText.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(40, -Top), new Vector2(w - 40, 32));
+                c.Pv = SmallBar(c.Root, T.pv, 0, -Top - 34, w, 6);
 
                 c.PeText = UIFactory.CreateText(c.Root, "PE", "", T.Label, 16, T.pe, TextAlignmentOptions.Left, 2);
-                UIFactory.Place(c.PeText.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -108), new Vector2(w / 2, 20));
+                UIFactory.Place(c.PeText.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -Top - 44), new Vector2(w / 2, 20));
                 c.SanText = UIFactory.CreateText(c.Root, "SAN", "", T.Label, 16, T.san, TextAlignmentOptions.Right, 2);
-                UIFactory.Place(c.SanText.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(w / 2, -108), new Vector2(w / 2, 20));
-                c.Pe = SmallBar(c.Root, T.pe, 0, -130, w / 2 - 6, 4);
-                c.San = SmallBar(c.Root, T.san, w / 2 + 6, -130, w / 2 - 6, 4);
+                UIFactory.Place(c.SanText.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(w / 2, -Top - 44), new Vector2(w / 2, 20));
+                c.Pe = SmallBar(c.Root, T.pe, 0, -Top - 66, w / 2 - 6, 4);
+                c.San = SmallBar(c.Root, T.san, w / 2 + 6, -Top - 66, w / 2 - 6, 4);
 
                 c.Status = UIFactory.CreateText(c.Root, "Status", "", T.Italic, 15, T.cendre);
-                UIFactory.Place(c.Status.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -138), new Vector2(w, 20));
+                UIFactory.Place(c.Status.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -Top - 72), new Vector2(w, 20));
                 _cards[u] = c;
             }
         }
@@ -509,7 +534,7 @@ namespace BelleEpoque
                 c.PvText.text = $"{sh.Hp}/{u.Stats.MaxHp}";
                 c.PeText.text = $"PE {sh.Pe}/{u.Stats.MaxPe}";
                 c.SanText.text = $"SAN {sh.Sanity}/{u.Stats.MaxSanity}";
-                c.Sub.text = $"{UnitDefinition.TrilhaName(u.Trilha).ToUpperInvariant()} · NEX {u.Nex}% · DEF {sh.Defesa}";
+                c.Sub.text = $"{ClassLabel(u)}\nNEX {u.Nex}%  ·  DEF {sh.Defesa}";
                 c.Name.color = !sh.Alive ? new Color(T.cendre.r, T.cendre.g, T.cendre.b, 0.5f) : current ? T.doreClaro : T.toile;
                 c.Glow.color = new Color(T.dore.r, T.dore.g, T.dore.b, current ? 0.18f : 0f);
                 c.Ring.color = current ? T.doreClaro : T.dore;
