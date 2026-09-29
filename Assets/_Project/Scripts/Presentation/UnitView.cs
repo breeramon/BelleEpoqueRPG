@@ -59,11 +59,16 @@ namespace BelleEpoque
 
         private Bounds GetBounds()
         {
-            if (_renderers == null || _renderers.Length == 0)
-                return new Bounds(transform.position + Vector3.up, Vector3.one);
-            var b = _renderers[0].bounds;
-            for (int i = 1; i < _renderers.Length; i++)
-                if (_renderers[i] != null && !(_renderers[i] is ParticleSystemRenderer)) b.Encapsulate(_renderers[i].bounds);
+            bool has = false;
+            var b = new Bounds(transform.position + Vector3.up, Vector3.one);
+            if (_renderers != null)
+                foreach (var r in _renderers)
+                {
+                    // Partículas (auras, VFX) não contam: o número deve ficar acima do corpo
+                    if (r == null || r is ParticleSystemRenderer || r is TrailRenderer || r is LineRenderer) continue;
+                    if (!has) { b = r.bounds; has = true; }
+                    else b.Encapsulate(r.bounds);
+                }
             return b;
         }
 

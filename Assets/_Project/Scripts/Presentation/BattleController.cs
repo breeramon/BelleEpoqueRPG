@@ -227,13 +227,6 @@ namespace BelleEpoque
             _views[unit] = view;
         }
 
-        /// <summary>Números saem perto dos pés dos agentes (onde fica a barra de PV) e acima das ameaças.</summary>
-        private static Vector3 PopupAnchor(UnitView view)
-        {
-            if (view.Unit != null && view.Unit.Team == Team.Heroes) return view.transform.position + Vector3.up * 0.7f;
-            return view.TopPosition;
-        }
-
         public UnitView ViewOf(BattleUnit unit) => unit != null && _views.TryGetValue(unit, out var v) ? v : null;
 
         // ------------------------------------------------------------------ Loop
@@ -308,7 +301,7 @@ namespace BelleEpoque
 
                 case BattleEventType.TurnSkipped:
                     hud?.Log(e.Message, e.Roll);
-                    if (actorView != null) DamagePopup.Spawn(PopupAnchor(actorView), e.Status == StatusType.Stunned ? "Atordoado" : "Paralisado!", infoColor, 4.5f);
+                    if (actorView != null) DamagePopup.Spawn(actorView, e.Status == StatusType.Stunned ? "Atordoado" : "Paralisado!", infoColor, 4.5f);
                     break;
 
                 case BattleEventType.ActionStarted:
@@ -337,9 +330,9 @@ namespace BelleEpoque
                     if (targetView == null) break;
                     bool selfCost = e.Actor == e.Target;
                     string text = e.IsCritical ? $"{e.Amount}!" : e.Amount.ToString();
-                    DamagePopup.Spawn(PopupAnchor(targetView), text, e.IsCritical ? criticalColor : damageColor, e.IsCritical ? 8f : 6f);
-                    if (e.IsWeakness) DamagePopup.Spawn(PopupAnchor(targetView) + Vector3.up * 0.5f, "VULNERÁVEL", infoColor, 4f);
-                    if (e.IsResisted) DamagePopup.Spawn(PopupAnchor(targetView) + Vector3.up * 0.5f, "RESISTENTE", Color.gray, 4f);
+                    DamagePopup.Spawn(targetView, text, e.IsCritical ? criticalColor : damageColor, e.IsCritical ? 8f : 6f);
+                    if (e.IsWeakness) DamagePopup.Spawn(targetView, "VULNERÁVEL", infoColor, 4f);
+                    if (e.IsResisted) DamagePopup.Spawn(targetView, "RESISTENTE", Color.gray, 4f);
 
                     if (!selfCost)
                     {
@@ -363,7 +356,7 @@ namespace BelleEpoque
                     hud?.Flash(e.Target);
                     if (targetView != null)
                     {
-                        DamagePopup.Spawn(PopupAnchor(targetView), "+" + e.Amount, healColor, 6f);
+                        DamagePopup.Spawn(targetView, "+" + e.Amount, healColor, 6f);
                         if (skillDef != null) SpawnVfx(skillDef.hitVfx, targetView.CenterPosition, Quaternion.identity);
                         sfx?.PlaySfx(skillDef != null && skillDef.hitSfx != null ? skillDef.hitSfx : sfx.heal);
                         yield return targetView.PlayHealed(new Color(0.6f, 1f, 0.7f));
@@ -376,7 +369,7 @@ namespace BelleEpoque
                     if (targetView != null && e.Amount != 0)
                     {
                         string text = e.Amount > 0 ? $"+{e.Amount} SAN" : $"{e.Amount} SAN";
-                        DamagePopup.Spawn(PopupAnchor(targetView) + Vector3.up * 0.3f, text, sanityColor, 5f);
+                        DamagePopup.Spawn(targetView, text, sanityColor, 5f);
                         if (e.Amount < 0)
                         {
                             sfx?.PlaySfx(sfx.sanityLoss, 0.8f);
@@ -398,14 +391,14 @@ namespace BelleEpoque
                 case BattleEventType.Miss:
                     hud?.Log(e.Message, e.Roll);
                     hud?.Flash(e.Target);
-                    if (targetView != null) DamagePopup.Spawn(PopupAnchor(targetView), "ERROU", Color.gray, 5f);
+                    if (targetView != null) DamagePopup.Spawn(targetView, "ERROU", Color.gray, 5f);
                     sfx?.PlaySfx(sfx.miss);
                     break;
 
                 case BattleEventType.StatusApplied:
                     hud?.Log(e.Message, e.Roll);
                     hud?.Flash(e.Target);
-                    if (targetView != null) DamagePopup.Spawn(PopupAnchor(targetView) + Vector3.up * 0.6f, BattleSystem.StatusName(e.Status).ToUpperInvariant(), infoColor, 4.5f);
+                    if (targetView != null) DamagePopup.Spawn(targetView, BattleSystem.StatusName(e.Status).ToUpperInvariant(), infoColor, 4.5f);
                     sfx?.PlaySfx(sfx.statusApplied, 0.7f);
                     break;
 
@@ -415,7 +408,7 @@ namespace BelleEpoque
                     if (targetView != null)
                     {
                         bool harmful = e.Amount < 0;
-                        DamagePopup.Spawn(PopupAnchor(targetView), harmful ? e.Amount.ToString() : "+" + e.Amount, harmful ? criticalColor : healColor, 5f);
+                        DamagePopup.Spawn(targetView, harmful ? e.Amount.ToString() : "+" + e.Amount, harmful ? criticalColor : healColor, 5f);
                         if (harmful) yield return targetView.PlayHit(false);
                     }
                     break;
@@ -428,7 +421,7 @@ namespace BelleEpoque
                 case BattleEventType.Defending:
                     hud?.Log(e.Message, e.Roll);
                     actorView?.PlayDefend();
-                    if (actorView != null) DamagePopup.Spawn(PopupAnchor(actorView), $"+{BattleUnit.DefendBonus} DEF", infoColor, 4.5f);
+                    if (actorView != null) DamagePopup.Spawn(actorView, $"+{BattleUnit.DefendBonus} DEF", infoColor, 4.5f);
                     break;
 
                 case BattleEventType.UnitDied:
