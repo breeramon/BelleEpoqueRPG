@@ -360,10 +360,10 @@ namespace BelleEpoque
                 c.Sub.fontSizeMax = 14;
                 UIFactory.Place(c.Sub.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(TX, -27), new Vector2(w - TX, 32));
 
-                var pvLabel = UIFactory.CreateText(c.Root, "PVRotulo", "PV", T.Label, 16, T.pv, TextAlignmentOptions.Left, 3);
-                UIFactory.Place(pvLabel.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -Top - 6), new Vector2(40, 30));
-                c.PvText = UIFactory.CreateText(c.Root, "PV", "", T.Label, 28, T.toile, TextAlignmentOptions.Right, 1);
-                UIFactory.Place(c.PvText.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(40, -Top), new Vector2(w - 40, 32));
+                // PV: "PV  48 / 48" — valor atual grande, máximo menor, lado a lado com o rótulo
+                c.PvText = UIFactory.CreateText(c.Root, "PV", "", T.Label, 21, T.toile, TextAlignmentOptions.BottomLeft, 1);
+                c.PvText.overflowMode = TextOverflowModes.Overflow; // nunca virar "..." (a fonte grande é mais alta que a caixa)
+                UIFactory.Place(c.PvText.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -Top - 4), new Vector2(w, 28));
                 c.Pv = SmallBar(c.Root, T.pv, 0, -Top - 34, w, 6);
 
                 c.PeText = UIFactory.CreateText(c.Root, "PE", "", T.Label, 16, T.pe, TextAlignmentOptions.Left, 2);
@@ -531,7 +531,9 @@ namespace BelleEpoque
                 UIFactory.SetFill(c.Pv, Pct(sh.Hp, u.Stats.MaxHp));
                 UIFactory.SetFill(c.Pe, Pct(sh.Pe, u.Stats.MaxPe));
                 UIFactory.SetFill(c.San, Pct(sh.Sanity, u.Stats.MaxSanity));
-                c.PvText.text = $"{sh.Hp}/{u.Stats.MaxHp}";
+                string pvHex = UITheme.ToHex(T.pv);
+                string curHex = UITheme.ToHex(Pct(sh.Hp, u.Stats.MaxHp) <= 0.3f ? T.carmin : T.toile);
+                c.PvText.text = $"<size=80%><color={pvHex}>PV</color></size>  <color={curHex}>{sh.Hp}</color><size=80%><color={UITheme.ToHex(T.cendre)}> / {u.Stats.MaxHp}</color></size>";
                 c.PeText.text = $"PE {sh.Pe}/{u.Stats.MaxPe}";
                 c.SanText.text = $"SAN {sh.Sanity}/{u.Stats.MaxSanity}";
                 c.Sub.text = $"{ClassLabel(u)}\nNEX {u.Nex}%  ·  DEF {sh.Defesa}";
