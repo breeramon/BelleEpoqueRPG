@@ -206,6 +206,26 @@ namespace BelleEpoque.Tests
             Assert.AreEqual(100, hero.Hp);
         }
 
+        [Test]
+        public void Eventos_GuardamOsNumerosDeCadaMomento_CuraAntesDoDano()
+        {
+            var tonic = new SkillData { Name = "Tônico", Kind = SkillKind.Heal, Target = TargetType.SingleAlly,
+                Resolution = SkillResolution.Automatic, DiceCount = 0, Power = 5, IsItem = true };
+            var hero = Hero("Céleste", agi: 3, hp: 100);
+            var enemy = Enemy("Cultista", agi: 1, hp: 500);
+            var battle = new BattleSystem(new[] { hero }, new[] { enemy }, new FixedRandom(0.9),
+                inventory: new Dictionary<SkillData, int> { { tonic, 1 } });
+            battle.Start();
+            // Usa a cura e, na mesma resolução, o inimigo ataca logo em seguida.
+            var events = battle.SubmitPlayerAction(BattleAction.UseSkill(hero, tonic, hero));
+
+            var heal = events.First(e => e.Type == BattleEventType.Heal);
+            var hit = events.First(e => e.Type == BattleEventType.Damage && e.Target == hero);
+            // No momento da cura a vida exibida é a de antes do golpe; o golpe vem depois
+            Assert.IsTrue(heal.States[hero].Hp > hit.States[hero].Hp);
+            Assert.AreEqual(hero.Hp, hit.States[hero].Hp);
+        }
+
         /// <summary>Devolve os valores pedidos, em ordem.</summary>
         private sealed class SequenceRandom : IRandom
         {

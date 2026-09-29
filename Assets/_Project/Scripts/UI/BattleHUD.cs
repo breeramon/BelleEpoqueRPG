@@ -92,6 +92,29 @@ namespace BelleEpoque
 
         public UITheme Theme => theme;
 
+        // ---------------- Números exibidos (avançam evento a evento, não saltam para o resultado final)
+        private readonly Dictionary<BattleUnit, UnitState> _display = new Dictionary<BattleUnit, UnitState>();
+
+        /// <summary>Estado exibido da unidade (o do último evento já mostrado).</summary>
+        public UnitState Shown(BattleUnit u)
+        {
+            if (!_display.TryGetValue(u, out var s)) { s = UnitState.Of(u); _display[u] = s; }
+            return s;
+        }
+
+        /// <summary>Chamado pelo controlador quando um evento começa a ser mostrado.</summary>
+        public void ApplyEvent(BattleEvent e)
+        {
+            if (e?.States == null) return;
+            foreach (var pair in e.States) _display[pair.Key] = pair.Value;
+        }
+
+        /// <summary>Alinha a exibição com o estado real (ex.: quando o jogador vai escolher a ação).</summary>
+        public void SyncToLive()
+        {
+            foreach (var u in _battle.AllUnits) _display[u] = UnitState.Of(u);
+        }
+
         // ================================================================== Construção
 
         public void Build(BattleController controller, BattleSystem battle)
@@ -102,6 +125,7 @@ namespace BelleEpoque
             _camera = Camera.main;
             if (theme == null) theme = UITheme.CreateDefault();
             DamagePopup.Font = T.Label;
+            SyncToLive();
 
             // Ordem de desenho: flutuantes embaixo, depois painéis, menu e tela final por cima
             var floatLayer = Layer("Flutuantes");
@@ -267,7 +291,7 @@ namespace BelleEpoque
             }
             var ring = UIFactory.CreatePanel(root, "Aro", highlight ? T.doreClaro : (hero ? T.dore : T.carmin), false, UIFactory.CircleSprite(true));
             UIFactory.Stretch(ring.rectTransform);
-            if (!unit.IsAlive) root.gameObject.AddComponent<CanvasGroup>().alpha = 0.35f;
+            if (!Shown(unit).Alive) root.gameObject.AddComponent<CanvasGroup>().alpha = 0.35f;
             return root;
         }
 
@@ -453,7 +477,8 @@ namespace BelleEpoque
                 var u = pair.Key;
                 var f = pair.Value;
                 var view = _controller.ViewOf(u);
-                bool want = view != null && (f.Pinned || Time.time < f.VisibleUntil) && (u.IsAlive || Time.time < f.VisibleUntil);
+                var shown = Shown(u);
+                bool want = view != null && (f.Pinned || Time.time < f.VisibleUntil) && (shown.Alive || Time.time < f.VisibleUntil);
                 f.Group.alpha = Mathf.MoveTowards(f.Group.alpha, want ? 1f : 0f, Time.deltaTime * 5f);
                 if (f.Group.alpha <= 0f || view == null) continue;
 
@@ -462,8 +487,8 @@ namespace BelleEpoque
                 if (ToCanvas(anchor, out var p))
                     f.Root.anchoredPosition = p + (hero ? new Vector2(0, -34) : new Vector2(0, 26));
 
-                UIFactory.SetFill(f.Fill, u.HpPercent);
-                f.Text.text = hero ? $"{u.Hp}/{u.Stats.MaxHp}" : $"{u.Name.ToUpperInvariant()}  ·  {u.Hp}/{u.Stats.MaxHp}";
+                UIFactory.SetFill(f.Fill, Pct(shown.Hp, u.Stats.MaxHp));
+                f.Text.text = hero ? $"{shown.Hp}/{u.Stats.MaxHp}" : $"{u.Name.ToUpperInvariant()}  ·  {shown.Hp}/{u.Stats.MaxHp}";
                 f.Root.localScale = Vector3.one * (f.Pinned ? 1.08f : 1f);
             }
         }
@@ -477,29 +502,32 @@ namespace BelleEpoque
                 var c = pair.Value;
                 bool current = _battle.CurrentUnit == u;
 
-                UIFactory.SetFill(c.Pv, u.HpPercent);
-                UIFactory.SetFill(c.Pe, u.PePercent);
-                UIFactory.SetFill(c.San, u.SanityPercent);
-                c.PvText.text = $"{u.Hp}/{u.Stats.MaxHp}";
-                c.PeText.text = $"PE {u.Pe}/{u.Stats.MaxPe}";
-                c.SanText.text = $"SAN {u.Sanity}/{u.Stats.MaxSanity}";
-                c.Sub.text = $"{UnitDefinition.TrilhaName(u.Trilha).ToUpperInvariant()} · NEX {u.Nex}% · DEF {u.CurrentDefesa}";
-                c.Name.color = !u.IsAlive ? new Color(T.cendre.r, T.cendre.g, T.cendre.b, 0.5f) : current ? T.doreClaro : T.toile;
+                var sh = Shown(u);
+                UIFactory.SetFill(c.Pv, Pct(sh.Hp, u.Stats.MaxHp));
+                UIFactory.SetFill(c.Pe, Pct(sh.Pe, u.Stats.MaxPe));
+                UIFactory.SetFill(c.San, Pct(sh.Sanity, u.Stats.MaxSanity));
+                c.PvText.text = $"{sh.Hp}/{u.Stats.MaxHp}";
+                c.PeText.text = $"PE {sh.Pe}/{u.Stats.MaxPe}";
+                c.SanText.text = $"SAN {sh.Sanity}/{u.Stats.MaxSanity}";
+                c.Sub.text = $"{UnitDefinition.TrilhaName(u.Trilha).ToUpperInvariant()} · NEX {u.Nex}% · DEF {sh.Defesa}";
+                c.Name.color = !sh.Alive ? new Color(T.cendre.r, T.cendre.g, T.cendre.b, 0.5f) : current ? T.doreClaro : T.toile;
                 c.Glow.color = new Color(T.dore.r, T.dore.g, T.dore.b, current ? 0.18f : 0f);
                 c.Ring.color = current ? T.doreClaro : T.dore;
                 c.Root.anchoredPosition = new Vector2(c.Root.anchoredPosition.x, c.BaseY + (current ? 14f : 0f));
 
                 var tags = new List<string>();
-                if (!u.IsAlive) tags.Add("caído");
+                if (!sh.Alive) tags.Add("caído");
                 else
                 {
-                    if (u.SanityState != SanityState.Lucid) tags.Add($"<color={UITheme.ToHex(T.san)}>{SanityLabel(u.SanityState)}</color>");
-                    if (u.IsDefending) tags.Add("defendendo");
-                    foreach (var s in u.Statuses) tags.Add($"{BattleSystem.StatusName(s.Type).ToLowerInvariant()} ({s.RemainingTurns})");
+                    if (sh.SanityState != SanityState.Lucid) tags.Add($"<color={UITheme.ToHex(T.san)}>{SanityLabel(sh.SanityState)}</color>");
+                    if (sh.Defending) tags.Add("defendendo");
+                    foreach (var s in sh.Statuses) tags.Add($"{BattleSystem.StatusName(s.Type).ToLowerInvariant()} ({s.RemainingTurns})");
                 }
                 c.Status.text = string.Join(" · ", tags);
             }
         }
+
+        private static float Pct(int value, int max) => max <= 0 ? 0f : Mathf.Clamp01((float)value / max);
 
         private static string SanityLabel(SanityState s)
         {

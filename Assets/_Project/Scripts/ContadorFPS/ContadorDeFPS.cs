@@ -5,10 +5,6 @@ using UnityEngine;
 /// Mostra o FPS (quadros por segundo) e o tempo de cada quadro no canto da tela.
 ///
 /// Como usar:
-///  - Coloque este script no objeto "ContadorDeFPS".
-///  - Arraste o texto (TextMeshPro - Text UI) para o campo "Texto Do Contador".
-///    Se o campo ficar vazio, o script procura um texto dentro do Canvas "TextoDoContadorDeFPS"
-///    e, se não achar, cria um sozinho no canto superior direito.
 ///  - F3 (no PC) ou toque com 3 dedos (no celular) mostra/esconde o contador.
 /// </summary>
 public class ContadorDeFPS : MonoBehaviour

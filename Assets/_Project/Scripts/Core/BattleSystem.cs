@@ -70,7 +70,8 @@ namespace BelleEpoque.Core
         public List<BattleEvent> Start()
         {
             if (State != BattleState.NotStarted) throw new InvalidOperationException("A batalha já começou.");
-            var events = new List<BattleEvent> { new BattleEvent { Type = BattleEventType.BattleStarted, Message = "A batalha começou!" } };
+            var events = new List<BattleEvent>();
+            Emit(events, new BattleEvent { Type = BattleEventType.BattleStarted, Message = "A batalha começou!" });
             RollInitiative(events);
             Advance(events);
             return events;
@@ -87,6 +88,14 @@ namespace BelleEpoque.Core
             Execute(action, events);
             Advance(events);
             return events;
+        }
+
+        /// <summary>Adiciona o evento junto com o retrato de todas as unidades naquele instante.</summary>
+        private void Emit(List<BattleEvent> events, BattleEvent e)
+        {
+            e.States = new Dictionary<BattleUnit, UnitState>();
+            foreach (var u in AllUnits) e.States[u] = UnitState.Of(u);
+            events.Add(e);
         }
 
         public IEnumerable<BattleUnit> AlliesOf(BattleUnit unit) => unit.Team == Team.Heroes ? _heroes : _enemies;
@@ -143,7 +152,7 @@ namespace BelleEpoque.Core
                 if (!unit.IsAlive) continue;
 
                 CurrentUnit = unit;
-                events.Add(new BattleEvent { Type = BattleEventType.TurnStarted, Actor = unit, Message = $"Turno de {unit.Name}." });
+                Emit(events, new BattleEvent { Type = BattleEventType.TurnStarted, Actor = unit, Message = $"Turno de {unit.Name}." });
 
                 if (!StartTurn(unit, events)) continue; // perdeu o turno ou morreu
                 if (CheckEnd(events)) return;
@@ -198,14 +207,14 @@ namespace BelleEpoque.Core
                 .ThenBy(x => x.Tie)
                 .Select(x => x.Unit).ToList();
             string order = string.Join(" · ", _initiativeOrder.Select(u => $"{u.Name} {u.Initiative}"));
-            events.Add(new BattleEvent { Type = BattleEventType.InitiativeRolled, Message = "Iniciativa: " + order, Roll = order });
+            Emit(events, new BattleEvent { Type = BattleEventType.InitiativeRolled, Message = "Iniciativa: " + order, Roll = order });
         }
 
         private void BeginRound(List<BattleEvent> events)
         {
             Round++;
             foreach (var u in _initiativeOrder.Where(u => u.IsAlive)) _turnQueue.Enqueue(u);
-            events.Add(new BattleEvent { Type = BattleEventType.RoundStarted, Amount = Round, Message = $"Rodada {Round}" });
+            Emit(events, new BattleEvent { Type = BattleEventType.RoundStarted, Amount = Round, Message = $"Rodada {Round}" });
         }
 
         /// <returns>true se a unidade pode agir neste turno.</returns>
@@ -221,20 +230,20 @@ namespace BelleEpoque.Core
                     case StatusType.Bleeding:
                     {
                         int dmg = unit.TakeDamage(Math.Max(1, (int)(unit.Stats.MaxHp * BleedPercent)));
-                        events.Add(new BattleEvent { Type = BattleEventType.StatusTick, Actor = unit, Target = unit, Status = StatusType.Bleeding, Amount = -dmg, Message = $"{unit.Name} sangra ({dmg})." });
+                        Emit(events, new BattleEvent { Type = BattleEventType.StatusTick, Actor = unit, Target = unit, Status = StatusType.Bleeding, Amount = -dmg, Message = $"{unit.Name} sangra ({dmg})." });
                         break;
                     }
                     case StatusType.Regenerating:
                     {
                         int heal = unit.Heal(Math.Max(1, (int)(unit.Stats.MaxHp * RegenPercent)));
-                        events.Add(new BattleEvent { Type = BattleEventType.StatusTick, Actor = unit, Target = unit, Status = StatusType.Regenerating, Amount = heal, Message = $"{unit.Name} regenera ({heal})." });
+                        Emit(events, new BattleEvent { Type = BattleEventType.StatusTick, Actor = unit, Target = unit, Status = StatusType.Regenerating, Amount = heal, Message = $"{unit.Name} regenera ({heal})." });
                         break;
                     }
                     case StatusType.Terrified:
                     {
                         int delta = unit.ChangeSanity(-TerrorPerTurn);
                         if (delta != 0)
-                            events.Add(new BattleEvent { Type = BattleEventType.SanityChanged, Actor = unit, Target = unit, Status = StatusType.Terrified, Amount = delta, Message = $"{unit.Name} é consumido(a) pelo terror ({delta} SAN)." });
+                            Emit(events, new BattleEvent { Type = BattleEventType.SanityChanged, Actor = unit, Target = unit, Status = StatusType.Terrified, Amount = delta, Message = $"{unit.Name} é consumido(a) pelo terror ({delta} SAN)." });
                         break;
                     }
                 }
@@ -256,13 +265,13 @@ namespace BelleEpoque.Core
                 if (status.RemainingTurns <= 0)
                 {
                     unit.Statuses.Remove(status);
-                    events.Add(new BattleEvent { Type = BattleEventType.StatusExpired, Actor = unit, Target = unit, Status = status.Type, Message = $"{StatusName(status.Type)} de {unit.Name} acabou." });
+                    Emit(events, new BattleEvent { Type = BattleEventType.StatusExpired, Actor = unit, Target = unit, Status = status.Type, Message = $"{StatusName(status.Type)} de {unit.Name} acabou." });
                 }
             }
 
             if (stunned)
             {
-                events.Add(new BattleEvent { Type = BattleEventType.TurnSkipped, Actor = unit, Status = StatusType.Stunned, Message = $"{unit.Name} está atordoado(a)!" });
+                Emit(events, new BattleEvent { Type = BattleEventType.TurnSkipped, Actor = unit, Status = StatusType.Stunned, Message = $"{unit.Name} está atordoado(a)!" });
                 return false;
             }
 
@@ -270,7 +279,7 @@ namespace BelleEpoque.Core
                        : unit.SanityState == SanityState.Panicked ? PanicSkipChance : 0f;
             if (skip > 0f && _rng.NextDouble() < skip)
             {
-                events.Add(new BattleEvent { Type = BattleEventType.TurnSkipped, Actor = unit, Message = $"{unit.Name} está paralisado(a) de medo!" });
+                Emit(events, new BattleEvent { Type = BattleEventType.TurnSkipped, Actor = unit, Message = $"{unit.Name} está paralisado(a) de medo!" });
                 return false;
             }
             return true;
@@ -286,7 +295,7 @@ namespace BelleEpoque.Core
             {
                 actor.IsDefending = true;
                 int pe = actor.RestorePe(DefendPeRestore);
-                events.Add(new BattleEvent { Type = BattleEventType.Defending, Actor = actor, Amount = pe, Message = $"{actor.Name} se defende (+{BattleUnit.DefendBonus} Defesa{(pe > 0 ? $", +{pe} PE" : "")})." });
+                Emit(events, new BattleEvent { Type = BattleEventType.Defending, Actor = actor, Amount = pe, Message = $"{actor.Name} se defende (+{BattleUnit.DefendBonus} Defesa{(pe > 0 ? $", +{pe} PE" : "")})." });
                 return;
             }
 
@@ -294,16 +303,16 @@ namespace BelleEpoque.Core
             if (skill.IsItem)
             {
                 _inventory[skill] = GetItemCount(skill) - 1;
-                events.Add(new BattleEvent { Type = BattleEventType.ItemUsed, Actor = actor, Skill = skill, Amount = _inventory[skill], Message = $"{actor.Name} usa {skill.Name}." });
+                Emit(events, new BattleEvent { Type = BattleEventType.ItemUsed, Actor = actor, Skill = skill, Amount = _inventory[skill], Message = $"{actor.Name} usa {skill.Name}." });
             }
 
             actor.Pay(skill);
-            events.Add(new BattleEvent { Type = BattleEventType.ActionStarted, Actor = actor, Skill = skill, Message = $"{actor.Name} usa {skill.Name}!" });
+            Emit(events, new BattleEvent { Type = BattleEventType.ActionStarted, Actor = actor, Skill = skill, Message = $"{actor.Name} usa {skill.Name}!" });
 
             if (skill.HpCost > 0)
-                events.Add(new BattleEvent { Type = BattleEventType.Damage, Actor = actor, Target = actor, Skill = skill, Amount = skill.HpCost, Message = $"{actor.Name} sacrifica {skill.HpCost} de vida." });
+                Emit(events, new BattleEvent { Type = BattleEventType.Damage, Actor = actor, Target = actor, Skill = skill, Amount = skill.HpCost, Message = $"{actor.Name} sacrifica {skill.HpCost} de vida." });
             if (skill.SanityCost > 0 && actor.Stats.MaxSanity > 0)
-                events.Add(new BattleEvent { Type = BattleEventType.SanityChanged, Actor = actor, Target = actor, Skill = skill, Amount = -skill.SanityCost, Message = $"{actor.Name} perde {skill.SanityCost} de Sanidade no ritual." });
+                Emit(events, new BattleEvent { Type = BattleEventType.SanityChanged, Actor = actor, Target = actor, Skill = skill, Amount = -skill.SanityCost, Message = $"{actor.Name} perde {skill.SanityCost} de Sanidade no ritual." });
 
             var targets = skill.TargetsAll
                 ? GetValidTargets(actor, skill).ToList()
@@ -328,7 +337,7 @@ namespace BelleEpoque.Core
                     if (!hit.Hit)
                     {
                         landed = false;
-                        events.Add(new BattleEvent { Type = BattleEventType.Miss, Actor = actor, Target = target, Skill = skill, Roll = hit.Roll, Message = $"{skill.Name} errou {target.Name}." });
+                        Emit(events, new BattleEvent { Type = BattleEventType.Miss, Actor = actor, Target = target, Skill = skill, Roll = hit.Roll, Message = $"{skill.Name} errou {target.Name}." });
                         break;
                     }
                     string halfNote = hit.SavedHalf ? " Resistiu: metade." : "";
@@ -336,34 +345,34 @@ namespace BelleEpoque.Core
                     if (skill.Element == Element.Fear && target.Stats.MaxSanity > 0)
                     {
                         int delta = target.ChangeSanity(-hit.Amount);
-                        events.Add(new BattleEvent { Type = BattleEventType.SanityChanged, Actor = actor, Target = target, Skill = skill, Amount = delta, IsCritical = hit.IsCritical, IsWeakness = hit.IsWeakness, IsResisted = hit.IsResisted, Roll = hit.Roll, Message = $"{target.Name} perde {-delta} de Sanidade.{halfNote}" });
+                        Emit(events, new BattleEvent { Type = BattleEventType.SanityChanged, Actor = actor, Target = target, Skill = skill, Amount = delta, IsCritical = hit.IsCritical, IsWeakness = hit.IsWeakness, IsResisted = hit.IsResisted, Roll = hit.Roll, Message = $"{target.Name} perde {-delta} de Sanidade.{halfNote}" });
                     }
                     else
                     {
                         int dealt = target.TakeDamage(hit.Amount);
                         string extra = hit.IsWeakness ? " Vulnerável!" : hit.IsResisted ? " Resistente." : "";
                         if (hit.IsCritical) extra = " Crítico!" + extra;
-                        events.Add(new BattleEvent { Type = BattleEventType.Damage, Actor = actor, Target = target, Skill = skill, Amount = dealt, IsCritical = hit.IsCritical, IsWeakness = hit.IsWeakness, IsResisted = hit.IsResisted, Roll = hit.Roll, Message = $"{target.Name} sofre {dealt} de dano.{extra}{halfNote}" });
+                        Emit(events, new BattleEvent { Type = BattleEventType.Damage, Actor = actor, Target = target, Skill = skill, Amount = dealt, IsCritical = hit.IsCritical, IsWeakness = hit.IsWeakness, IsResisted = hit.IsResisted, Roll = hit.Roll, Message = $"{target.Name} sofre {dealt} de dano.{extra}{halfNote}" });
                     }
 
                     if (skill.SanityDamage > 0 && target.IsAlive)
                     {
                         int delta = target.ChangeSanity(-OrdemRules.RolarDados(_rng, 1, skill.SanityDamage));
                         if (delta != 0)
-                            events.Add(new BattleEvent { Type = BattleEventType.SanityChanged, Actor = actor, Target = target, Skill = skill, Amount = delta, Message = $"{target.Name} perde {-delta} de Sanidade." });
+                            Emit(events, new BattleEvent { Type = BattleEventType.SanityChanged, Actor = actor, Target = target, Skill = skill, Amount = delta, Message = $"{target.Name} perde {-delta} de Sanidade." });
                     }
                     break;
                 }
                 case SkillKind.Heal:
                 {
                     int healed = target.Heal(DamageCalculator.ResolveRestore(actor, skill, _rng));
-                    events.Add(new BattleEvent { Type = BattleEventType.Heal, Actor = actor, Target = target, Skill = skill, Amount = healed, Message = $"{target.Name} recupera {healed} de vida." });
+                    Emit(events, new BattleEvent { Type = BattleEventType.Heal, Actor = actor, Target = target, Skill = skill, Amount = healed, Message = $"{target.Name} recupera {healed} de vida." });
                     break;
                 }
                 case SkillKind.RestoreSanity:
                 {
                     int delta = target.ChangeSanity(DamageCalculator.ResolveRestore(actor, skill, _rng));
-                    events.Add(new BattleEvent { Type = BattleEventType.SanityChanged, Actor = actor, Target = target, Skill = skill, Amount = delta, Message = $"{target.Name} recupera {delta} de Sanidade." });
+                    Emit(events, new BattleEvent { Type = BattleEventType.SanityChanged, Actor = actor, Target = target, Skill = skill, Amount = delta, Message = $"{target.Name} recupera {delta} de Sanidade." });
                     break;
                 }
                 case SkillKind.Buff:
@@ -379,13 +388,13 @@ namespace BelleEpoque.Core
             if (landed && skill.AppliesStatus && _rng.NextDouble() < skill.StatusChance)
             {
                 target.AddStatus(skill.Status, skill.StatusDuration);
-                events.Add(new BattleEvent { Type = BattleEventType.StatusApplied, Actor = actor, Target = target, Skill = skill, Status = skill.Status, Amount = skill.StatusDuration, Message = $"{target.Name}: {StatusName(skill.Status)}!" });
+                Emit(events, new BattleEvent { Type = BattleEventType.StatusApplied, Actor = actor, Target = target, Skill = skill, Status = skill.Status, Amount = skill.StatusDuration, Message = $"{target.Name}: {StatusName(skill.Status)}!" });
             }
         }
 
         private void OnUnitDied(BattleUnit unit, List<BattleEvent> events)
         {
-            events.Add(new BattleEvent { Type = BattleEventType.UnitDied, Actor = unit, Target = unit, Message = $"{unit.Name} caiu!" });
+            Emit(events, new BattleEvent { Type = BattleEventType.UnitDied, Actor = unit, Target = unit, Message = $"{unit.Name} caiu!" });
 
             // Ver um companheiro cair abala a sanidade dos heróis.
             if (unit.Team != Team.Heroes) return;
@@ -393,7 +402,7 @@ namespace BelleEpoque.Core
             {
                 int delta = ally.ChangeSanity(-HorrorOnAllyDeath);
                 if (delta != 0)
-                    events.Add(new BattleEvent { Type = BattleEventType.SanityChanged, Actor = unit, Target = ally, Amount = delta, Message = $"{ally.Name} fica horrorizado(a) ({delta} SAN)." });
+                    Emit(events, new BattleEvent { Type = BattleEventType.SanityChanged, Actor = unit, Target = ally, Amount = delta, Message = $"{ally.Name} fica horrorizado(a) ({delta} SAN)." });
             }
         }
 
@@ -404,14 +413,14 @@ namespace BelleEpoque.Core
             {
                 State = BattleState.Victory;
                 CurrentUnit = null;
-                events.Add(new BattleEvent { Type = BattleEventType.Victory, Message = "Vitória! O Outro Lado recua... por enquanto." });
+                Emit(events, new BattleEvent { Type = BattleEventType.Victory, Message = "Vitória! O Outro Lado recua... por enquanto." });
                 return true;
             }
             if (_heroes.All(h => !h.IsAlive))
             {
                 State = BattleState.Defeat;
                 CurrentUnit = null;
-                events.Add(new BattleEvent { Type = BattleEventType.Defeat, Message = "Derrota. A névoa engole a expedição." });
+                Emit(events, new BattleEvent { Type = BattleEventType.Defeat, Message = "Derrota. A névoa engole a expedição." });
                 return true;
             }
             return false;

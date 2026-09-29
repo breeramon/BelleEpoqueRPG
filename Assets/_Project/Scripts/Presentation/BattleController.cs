@@ -255,11 +255,13 @@ namespace BelleEpoque
             _busy = true;
             for (int i = 0; i < events.Count; i++)
             {
-                yield return Handle(events[i], events, i);
-                if (hud != null) hud.Refresh();
+                // Os números da HUD avançam junto com cada evento (cura aparece antes do dano seguinte, etc.)
+                if (hud != null) { hud.ApplyEvent(events[i]); hud.Refresh(); }
                 UpdateDread();
+                yield return Handle(events[i], events, i);
             }
             yield return ReturnAway();
+            if (hud != null) { hud.SyncToLive(); hud.Refresh(); }
             _busy = false;
 
             if (_battle.State == BattleState.WaitingForPlayer && hud != null)
@@ -498,8 +500,12 @@ namespace BelleEpoque
         private void UpdateDread()
         {
             if (sanityFx == null) return;
-            var alive = _battle.Heroes.Where(h => h.IsAlive).ToList();
-            float avg = alive.Count == 0 ? 0f : alive.Average(h => h.SanityPercent);
+            var alive = _battle.Heroes.Where(h => hud != null ? hud.Shown(h).Alive : h.IsAlive).ToList();
+            float avg = alive.Count == 0 ? 0f : alive.Average(h =>
+            {
+                if (hud == null || h.Stats.MaxSanity <= 0) return h.SanityPercent;
+                return Mathf.Clamp01((float)hud.Shown(h).Sanity / h.Stats.MaxSanity);
+            });
             sanityFx.SetDread(1f - avg);
         }
 
