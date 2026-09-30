@@ -53,7 +53,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 98b91b55ad76b6345b563c6b761e04a8, type: 2}
   - {fileID: 11400000, guid: c247f9d54e4d4504683d8bce22a4950c, type: 2}
   - {fileID: 11400000, guid: 92139f1039bf92b49bfd691c4e693e16, type: 2}
-  modelPrefab: {fileID: 5104794398818058025, guid: 6a7437e24c3b68f4aa59130111d53e63, type: 3}
+  modelPrefab: {fileID: 7470815406032308078, guid: 346327b5dec9c8b4fa288b9b594436cc, type: 3}
   modelScale: 1
   hurtSfx: {fileID: 0}
   deathSfx: {fileID: 0}

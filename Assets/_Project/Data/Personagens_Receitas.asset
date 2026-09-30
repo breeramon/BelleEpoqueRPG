@@ -1,0 +1,133 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12c602763cc40ba49aa1075a170cefff, type: 3}
+  m_Name: Personagens_Receitas
+  m_EditorClassIdentifier: Assembly-CSharp-Editor::BelleEpoque.EditorTools.CharacterRecipeLibrary
+  receitas:
+  - nome: Lucien_Duval
+    ficha: {fileID: 11400000, guid: 1ba46b30682676f459f63f476a3e99f3, type: 2}
+    roupa: Male_Peasant.fbx
+    corpo: Superhero_Male_FullBody.fbx
+    cabelos:
+    - Hair_Beard.fbx
+    - Hair_SimpleParted.fbx
+    roupaTextura: T_Peasant_BaseColor.png
+    roupaTom: {r: 1, g: 1, b: 1, a: 1}
+    olhosTom: {r: 0, g: 1, b: 1, a: 1}
+    fantasma: 0
+    corPrincipal: {r: 0.86, g: 0.8, b: 0.72, a: 1}
+    corJuntas: {r: 0.22, g: 0.17, b: 0.15, a: 1}
+    idle: Sword_Idle
+    attack: Pistol_Idle_Loop
+    cast: Spell_Simple_Shoot
+    heal: Spell_Simple_Enter
+    hit: Hit_Chest
+    defend: Sword_Block
+    item: Consume
+    die: Death01
+  - nome: Margot_Verlaine
+    ficha: {fileID: 11400000, guid: 730737dac935abb458708668ca472634, type: 2}
+    roupa: Female_Peasant.fbx
+    corpo: Superhero_Female_FullBody.fbx
+    cabelos:
+    - Hair_Long.fbx
+    roupaTextura: T_Peasant_BaseColor.png
+    roupaTom: {r: 0.78, g: 0.7, b: 0.88, a: 1}
+    olhosTom: {r: 1, g: 1, b: 1, a: 1}
+    fantasma: 0
+    corPrincipal: {r: 0.86, g: 0.8, b: 0.72, a: 1}
+    corJuntas: {r: 0.22, g: 0.17, b: 0.15, a: 1}
+    idle: Spell_Simple_Idle_Loop
+    attack: Sword_Regular_B
+    cast: Spell_Simple_Shoot
+    heal: Spell_Simple_Enter
+    hit: Hit_Head
+    defend: Sword_Block
+    item: Consume
+    die: Death01
+  - nome: Irma_Celeste
+    ficha: {fileID: 11400000, guid: 7341f6643d2974b4f985c5cd1da16d7c, type: 2}
+    roupa: Female_Ranger.fbx
+    corpo: Superhero_Female_FullBody.fbx
+    cabelos: []
+    roupaTextura: T_Ranger_BaseColor.png
+    roupaTom: {r: 0.55, g: 0.55, b: 0.62, a: 1}
+    olhosTom: {r: 1, g: 1, b: 1, a: 1}
+    fantasma: 0
+    corPrincipal: {r: 0.86, g: 0.8, b: 0.72, a: 1}
+    corJuntas: {r: 0.22, g: 0.17, b: 0.15, a: 1}
+    idle: Idle_Lantern_Loop
+    attack: Melee_Hook
+    cast: Spell_Simple_Shoot
+    heal: Spell_Simple_Enter
+    hit: Hit_Chest
+    defend: Sword_Block
+    item: Consume
+    die: Death01
+  - nome: Cultista_Encapuzado
+    ficha: {fileID: 11400000, guid: 6bc05df477d5eb54c88212f35e8507a0, type: 2}
+    roupa: Male_Ranger.fbx
+    corpo: Superhero_Male_FullBody.fbx
+    cabelos: []
+    roupaTextura: T_Ranger_3_BaseColor.png
+    roupaTom: {r: 0.8, g: 0.4, b: 0.4, a: 1}
+    olhosTom: {r: 1, g: 1, b: 1, a: 1}
+    fantasma: 0
+    corPrincipal: {r: 0.86, g: 0.8, b: 0.72, a: 1}
+    corJuntas: {r: 0.22, g: 0.17, b: 0.15, a: 1}
+    idle: Idle_Loop
+    attack: Sword_Regular_A
+    cast: Spell_Simple_Shoot
+    heal: Spell_Simple_Enter
+    hit: Hit_Chest
+    defend: Sword_Block
+    item: 
+    die: Death01
+  - nome: Manequim_Rastejante
+    ficha: {fileID: 11400000, guid: c55a095a1887061488a493853a59b413, type: 2}
+    roupa: Mannequin_F.fbx
+    corpo: 
+    cabelos: []
+    roupaTextura: 
+    roupaTom: {r: 1, g: 1, b: 1, a: 1}
+    olhosTom: {r: 1, g: 1, b: 1, a: 1}
+    fantasma: 0
+    corPrincipal: {r: 0.86, g: 0.8, b: 0.72, a: 1}
+    corJuntas: {r: 0.22, g: 0.17, b: 0.15, a: 1}
+    idle: Zombie_Idle_Loop
+    attack: Zombie_Scratch
+    cast: Zombie_Scratch
+    heal: 
+    hit: Hit_Chest
+    defend: 
+    item: 
+    die: Death01
+  - nome: Aparicao_do_Teatro
+    ficha: {fileID: 11400000, guid: ef13e482c28acb040a8f7719b82c7c6e, type: 2}
+    roupa: Female_Ranger.fbx
+    corpo: Superhero_Female_FullBody.fbx
+    cabelos:
+    - Hair_Long.fbx
+    roupaTextura: T_Ranger_BaseColor.png
+    roupaTom: {r: 1, g: 1, b: 1, a: 1}
+    olhosTom: {r: 1, g: 1, b: 1, a: 1}
+    fantasma: 1
+    corPrincipal: {r: 0.86, g: 0.8, b: 0.72, a: 1}
+    corJuntas: {r: 0.22, g: 0.17, b: 0.15, a: 1}
+    idle: Zombie_Idle_Loop
+    attack: Zombie_Scratch
+    cast: Spell_Simple_Shoot
+    heal: 
+    hit: Hit_Head
+    defend: 
+    item: 
+    die: Death01

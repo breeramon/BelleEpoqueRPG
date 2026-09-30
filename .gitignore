@@ -131,3 +131,6 @@ Desktop.ini
 
 # Cache do assistente de IA da Unity
 /[Aa]ssets/[Aa][Ii]/[Cc]ache/
+
+# Arquivos de Godot/Unreal/Blender que vieram nos pacotes de arte (não usados pelo Unity)
+/_Fontes_NaoUnity/

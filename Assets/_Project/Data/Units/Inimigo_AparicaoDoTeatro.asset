@@ -51,7 +51,7 @@ MonoBehaviour:
   skills:
   - {fileID: 11400000, guid: 1ebf7fac45edc4845a156b7afe447b6b, type: 2}
   - {fileID: 11400000, guid: 2db86941c62be524a9ab83bb196a9e73, type: 2}
-  modelPrefab: {fileID: 567809498002261146, guid: a7d58a72658075848b6a61f1940aaa71, type: 3}
+  modelPrefab: {fileID: 1200164021130255344, guid: 0788e3ded81353e46879410f5fed8fff, type: 3}
   modelScale: 1
   hurtSfx: {fileID: 0}
   deathSfx: {fileID: 0}

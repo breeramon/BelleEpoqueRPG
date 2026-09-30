@@ -38,10 +38,21 @@ namespace BelleEpoque
             _mpb = new MaterialPropertyBlock();
 
             _animator = GetComponentInChildren<Animator>();
-            if (_animator != null)
+            if (_animator != null && _animator.runtimeAnimatorController != null)
             {
-                _animator.applyRootMotion = false; // animações do Mixamo não devem mover o personagem
-                foreach (var p in _animator.parameters) _animatorParams.Add(p.name);
+                _animator.applyRootMotion = false; // animações não devem mover o personagem
+                if (!_animator.isInitialized) _animator.Rebind();
+                if (_animator.isInitialized)
+                {
+                    foreach (var p in _animator.parameters) _animatorParams.Add(p.name);
+                }
+                else
+                {
+                    var av = _animator.avatar;
+                    Debug.LogWarning($"[UnitView] Animator de '{name}' não iniciou. avatar={(av != null ? av.name : "nenhum")} " +
+                                     $"humano={(av != null && av.isHuman)} válido={(av != null && av.isValid)} " +
+                                     $"controller={_animator.runtimeAnimatorController.name} ativo={_animator.isActiveAndEnabled}");
+                }
             }
         }
 

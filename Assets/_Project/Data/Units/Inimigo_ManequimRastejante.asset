@@ -50,7 +50,7 @@ MonoBehaviour:
   basicAttack: {fileID: 11400000, guid: 22116d60a3d83564c8694ac1fc4d91e1, type: 2}
   skills:
   - {fileID: 11400000, guid: b5f234e0f5a75ab40925c119a00555d3, type: 2}
-  modelPrefab: {fileID: 1026362839360702154, guid: fe111ba164c87054897d57b8cc2fd07a, type: 3}
+  modelPrefab: {fileID: 7141749480318626066, guid: 867ac09dbe90b7641b2257cc887ee6f5, type: 3}
   modelScale: 1
   hurtSfx: {fileID: 0}
   deathSfx: {fileID: 0}

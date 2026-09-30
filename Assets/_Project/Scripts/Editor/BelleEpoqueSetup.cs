@@ -304,7 +304,29 @@ namespace BelleEpoque.EditorTools
         }
 
         private static SkillDefinition Skill(string file, Action<SkillDefinition> configure) => Upsert($"{SkillsDir}/{file}.asset", configure);
-        private static UnitDefinition Unit(string file, Action<UnitDefinition> configure) => Upsert($"{UnitsDir}/{file}.asset", configure);
+        /// <summary>
+        /// Recria a ficha, mas mantém o modelo 3D e o retrato que você (ou o menu 4) já colocou:
+        /// só os bonecos provisórios são trocados de volta.
+        /// </summary>
+        private static UnitDefinition Unit(string file, Action<UnitDefinition> configure)
+        {
+            string path = $"{UnitsDir}/{file}.asset";
+            var existing = AssetDatabase.LoadAssetAtPath<UnitDefinition>(path);
+            GameObject keepModel = null;
+            float keepScale = 1f;
+            Sprite keepPortrait = existing != null ? existing.portrait : null;
+            if (existing != null && existing.modelPrefab != null && !AssetDatabase.GetAssetPath(existing.modelPrefab).StartsWith(PrefabsDir))
+            {
+                keepModel = existing.modelPrefab;
+                keepScale = existing.modelScale;
+            }
+            return Upsert(path, (UnitDefinition u) =>
+            {
+                configure(u);
+                if (keepModel != null) { u.modelPrefab = keepModel; u.modelScale = keepScale; }
+                if (keepPortrait != null) u.portrait = keepPortrait;
+            });
+        }
 
         // Atalhos para montar habilidades no padrão de Ordem
         private static void Melee(SkillDefinition s, string name, int dice, int sides, int bonus, float shake = 0.15f)
@@ -421,8 +443,8 @@ namespace BelleEpoque.EditorTools
             });
 
             // ---------------- Itens
-            var tonico = Skill("Item_TonicoMedicinal", s => { Support(s, "Tônico Medicinal", SkillKind.Heal, TargetType.SingleAlly, 0, 2, 8); s.power = 4; s.isItem = true; s.description = "Frasco âmbar de farmácia. Cura 2d8+4 PV."; });
-            var sais = Skill("Item_SaisAromaticos", s => { Support(s, "Sais Aromáticos", SkillKind.RestoreSanity, TargetType.SingleAlly, 0, 2, 6); s.power = 4; s.isItem = true; s.description = "Desperta os sentidos. Recupera 2d6+4 de Sanidade."; });
+            var tonico = Skill("Item_TonicoMedicinal", s => { Support(s, "Tônico Medicinal", SkillKind.Heal, TargetType.SingleAlly, 0, 2, 8); s.power = 4; s.isItem = true; s.animationTrigger = "Item"; s.description = "Frasco âmbar de farmácia. Cura 2d8+4 PV."; });
+            var sais = Skill("Item_SaisAromaticos", s => { Support(s, "Sais Aromáticos", SkillKind.RestoreSanity, TargetType.SingleAlly, 0, 2, 6); s.power = 4; s.isItem = true; s.animationTrigger = "Item"; s.description = "Desperta os sentidos. Recupera 2d6+4 de Sanidade."; });
 
             // ---------------- Agentes (NEX 35%: limite de 7 PE por rodada)
             var lucien = Unit("Heroi_LucienDuval", u =>
@@ -524,7 +546,7 @@ namespace BelleEpoque.EditorTools
             if (existing != null) return existing;
 
             var ctrl = AnimatorController.CreateAnimatorControllerAtPath(path);
-            string[] triggers = { "Attack", "Cast", "Heal", "Hit", "Defend", "Die" };
+            string[] triggers = { "Attack", "Cast", "Heal", "Hit", "Defend", "Item", "Die" };
             foreach (var t in triggers) ctrl.AddParameter(t, AnimatorControllerParameterType.Trigger);
 
             var sm = ctrl.layers[0].stateMachine;
