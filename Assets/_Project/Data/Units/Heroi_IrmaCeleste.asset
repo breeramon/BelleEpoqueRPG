@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BelleEpoque.UnitDefinition
   displayName: "Irm\xE3 C\xE9leste"
   roleName: "Especialista \xB7 M\xE9dico de Campo"
-  lore: "Freira do H\xF4tel-Dieu. Suas preces funcionam \u2014 e ela tem medo de descobrir por qu\xEA."
+  lore: "Freira do H\xF4tel-Dieu, acostumada a costurar feridas \xE0 luz de lampi\xE3o. Suas preces funcionam \u2014 e ela tem medo de descobrir por qu\xEA."
   portrait: {fileID: 0}
   themeColor: {r: 0.9, g: 0.85, b: 0.7, a: 1}
   trilha: 1

@@ -29,6 +29,7 @@ namespace BelleEpoque.EditorTools
         private const string PrefabsDir = Root + "/Prefabs/Placeholders";
         private const string SettingsDir = Root + "/Settings";
         private const string ScenePath = Root + "/Scenes/Battle.unity";
+        private const string MenuScenePath = Root + "/Scenes/MainMenu.unity";
 
         // ================================================================== Menus
 
@@ -88,6 +89,93 @@ namespace BelleEpoque.EditorTools
             var ctrl = CreateAnimatorTemplate();
             Selection.activeObject = ctrl;
             EditorGUIUtility.PingObject(ctrl);
+        }
+
+        [MenuItem("Belle Époque/5. Criar menu inicial", priority = 3)]
+        public static void CreateMainMenu()
+        {
+            if (!NotInPlayMode()) return;
+            if (!EnsureTextMeshPro()) return;
+            var theme = AssetDatabase.LoadAssetAtPath<UITheme>(SettingsDir + "/Tema_BelleEpoque.asset");
+            var encounter = AssetDatabase.LoadAssetAtPath<EncounterDefinition>(DataDir + "/Encontro_RueDesOmbres.asset");
+            if (theme == null || encounter == null)
+            {
+                EditorUtility.DisplayDialog("Belle Époque", "Rode primeiro o menu \"1. Montar projeto de exemplo\" (o menu inicial usa o tema e os agentes dele).", "OK");
+                return;
+            }
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            EnsureFolders();
+            AtualizarHistorias(encounter.heroes);
+
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            // NewScene descarrega os assets carregados antes: recarrega pelo caminho
+            theme = AssetDatabase.LoadAssetAtPath<UITheme>(SettingsDir + "/Tema_BelleEpoque.asset");
+            encounter = AssetDatabase.LoadAssetAtPath<EncounterDefinition>(DataDir + "/Encontro_RueDesOmbres.asset");
+
+            var camGo = new GameObject("Main Camera");
+            camGo.tag = "MainCamera";
+            var cam = camGo.AddComponent<Camera>();
+            camGo.AddComponent<AudioListener>();
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = theme.nuit;
+
+            var canvasGo = new GameObject("MenuInicial");
+            canvasGo.layer = 5;
+            var canvas = canvasGo.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            var scaler = canvasGo.AddComponent<UnityEngine.UI.CanvasScaler>();
+            scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.matchWidthOrHeight = 0.5f;
+            canvasGo.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+            var menu = canvasGo.AddComponent<MainMenuController>();
+            var so = new SerializedObject(menu);
+            so.FindProperty("theme").objectReferenceValue = theme;
+            var lista = so.FindProperty("agentes");
+            lista.arraySize = encounter.heroes.Count;
+            for (int i = 0; i < encounter.heroes.Count; i++) lista.GetArrayElementAtIndex(i).objectReferenceValue = encounter.heroes[i];
+            so.FindProperty("cenaDaBatalha").stringValue = System.IO.Path.GetFileNameWithoutExtension(ScenePath);
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            var eventSystem = new GameObject("EventSystem");
+            eventSystem.AddComponent<UnityEngine.EventSystems.EventSystem>();
+            eventSystem.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+
+            EditorSceneManager.SaveScene(scene, MenuScenePath);
+            OrdenarCenasNoBuild();
+            Selection.activeGameObject = canvasGo;
+
+            EditorUtility.DisplayDialog("Belle Époque",
+                "Menu inicial criado em Assets/_Project/Scenes/MainMenu.\n\n" +
+                "Ele é a primeira cena do jogo (Build Settings) e o INICIAR abre a batalha.\nAperte Play para ver.", "OK");
+        }
+
+        /// <summary>Menu inicial primeiro, batalha em seguida, e as demais cenas depois.</summary>
+        private static void OrdenarCenasNoBuild()
+        {
+            var cenas = EditorBuildSettings.scenes.Where(c => c.path != MenuScenePath && c.path != ScenePath).ToList();
+            int i = 0;
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(MenuScenePath) != null) cenas.Insert(i++, new EditorBuildSettingsScene(MenuScenePath, true));
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) != null) cenas.Insert(i, new EditorBuildSettingsScene(ScenePath, true));
+            EditorBuildSettings.scenes = cenas.ToArray();
+        }
+
+        /// <summary>Troca as histórias curtas antigas dos agentes pelas novas (não mexe em textos que você mesmo escreveu).</summary>
+        private static void AtualizarHistorias(IEnumerable<UnitDefinition> agentes)
+        {
+            var trocas = new Dictionary<string, string>
+            {
+                { "Ex-soldado da Legião. Voltou da guerra ouvindo vozes que ninguém mais ouve.", "Ex-soldado da Legião Estrangeira. Voltou do front com uma cicatriz no peito e vozes que ninguém mais ouve. Hoje empunha o sabre pela Ordo Realitas, certo de que algumas coisas só param quando sangram." },
+                { "Acadêmica da Sorbonne expulsa por estudar livros que não deveriam existir.", "Acadêmica da Sorbonne, expulsa por estudar livros que não deveriam existir. Lê sigilos como quem lê poesia — e sabe que cada ritual cobra um pedaço de quem o conjura." },
+                { "Freira do Hôtel-Dieu. Suas preces funcionam — e ela tem medo de descobrir por quê.", "Freira do Hôtel-Dieu, acostumada a costurar feridas à luz de lampião. Suas preces funcionam — e ela tem medo de descobrir por quê." },
+            };
+            foreach (var a in agentes)
+            {
+                if (a == null || !trocas.TryGetValue(a.lore ?? "", out var nova)) continue;
+                a.lore = nova;
+                EditorUtility.SetDirty(a);
+            }
+            AssetDatabase.SaveAssets();
         }
 
         private static bool NotInPlayMode()
@@ -450,7 +538,7 @@ namespace BelleEpoque.EditorTools
             var lucien = Unit("Heroi_LucienDuval", u =>
             {
                 u.displayName = "Lucien Duval"; u.roleName = "Combatente";
-                u.lore = "Ex-soldado da Legião. Voltou da guerra ouvindo vozes que ninguém mais ouve.";
+                u.lore = "Ex-soldado da Legião Estrangeira. Voltou do front com uma cicatriz no peito e vozes que ninguém mais ouve. Hoje empunha o sabre pela Ordo Realitas, certo de que algumas coisas só param quando sangram.";
                 u.trilha = Trilha.Combatente; u.nex = 35; u.atributos = new Atributos(2, 3, 1, 1, 3);
                 u.bonusDefesa = 5; u.resistenciaBonus = 5;
                 u.basicAttack = sabre; u.skills = new List<SkillDefinition> { especial, varredura, lamina };
@@ -459,7 +547,7 @@ namespace BelleEpoque.EditorTools
             var margot = Unit("Heroi_MargotVerlaine", u =>
             {
                 u.displayName = "Margot Verlaine"; u.roleName = "Ocultista";
-                u.lore = "Acadêmica da Sorbonne expulsa por estudar livros que não deveriam existir.";
+                u.lore = "Acadêmica da Sorbonne, expulsa por estudar livros que não deveriam existir. Lê sigilos como quem lê poesia — e sabe que cada ritual cobra um pedaço de quem o conjura.";
                 u.trilha = Trilha.Ocultista; u.nex = 35; u.atributos = new Atributos(2, 0, 4, 3, 1);
                 u.resistenciaBonus = 5; u.weaknesses = new List<Element> { Element.Blood };
                 u.basicAttack = bengala; u.skills = new List<SkillDefinition> { sigilo, decadencia, descarga, proibido };
@@ -468,7 +556,7 @@ namespace BelleEpoque.EditorTools
             var celeste = Unit("Heroi_IrmaCeleste", u =>
             {
                 u.displayName = "Irmã Céleste"; u.roleName = "Especialista · Médico de Campo";
-                u.lore = "Freira do Hôtel-Dieu. Suas preces funcionam — e ela tem medo de descobrir por quê.";
+                u.lore = "Freira do Hôtel-Dieu, acostumada a costurar feridas à luz de lampião. Suas preces funcionam — e ela tem medo de descobrir por quê.";
                 u.trilha = Trilha.Especialista; u.nex = 35; u.atributos = new Atributos(2, 1, 3, 2, 2);
                 u.bonusDefesa = 2; u.resistenciaBonus = 5; u.weaknesses = new List<Element> { Element.Death };
                 u.basicAttack = lanterna; u.skills = new List<SkillDefinition> { paramedico, vigilia, lucidez, egide };
@@ -819,9 +907,7 @@ namespace BelleEpoque.EditorTools
 
             // ---------- Salvar e registrar no Build
             EditorSceneManager.SaveScene(scene, ScenePath);
-            var scenes = EditorBuildSettings.scenes.Where(s => s.path != ScenePath).ToList();
-            scenes.Insert(0, new EditorBuildSettingsScene(ScenePath, true));
-            EditorBuildSettings.scenes = scenes.ToArray();
+            OrdenarCenasNoBuild();
 
             Selection.activeGameObject = controllerGo;
             return true;

@@ -473,6 +473,17 @@ namespace BelleEpoque
             btnRt.pivot = new Vector2(0.5f, 0.5f);
             btnRt.anchoredPosition = new Vector2(0, -110);
             btnRt.localRotation = Quaternion.identity;
+
+            // Volta ao menu inicial (só aparece se a cena do menu estiver no Build)
+            if (Application.CanStreamedLevelBeLoaded(MenuScene))
+            {
+                var menu = Stroke(dim.transform, "Menu inicial", "", () => SceneManager.LoadScene(MenuScene), true, null);
+                var menuRt = (RectTransform)menu.transform;
+                menuRt.anchorMin = menuRt.anchorMax = new Vector2(0.5f, 0.5f);
+                menuRt.pivot = new Vector2(0.5f, 0.5f);
+                menuRt.anchoredPosition = new Vector2(0, -110 - optionHeight - 16);
+                menuRt.localRotation = Quaternion.identity;
+            }
             _endPanel.SetActive(false);
         }
 
@@ -617,6 +628,7 @@ namespace BelleEpoque
             _endPanel.SetActive(true);
         }
 
+        private const string MenuScene = "MainMenu";
         private void Restart() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 
         // ================================================================== Menu em leque

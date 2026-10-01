@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BelleEpoque.UnitDefinition
   displayName: Lucien Duval
   roleName: Combatente
-  lore: "Ex-soldado da Legi\xE3o. Voltou da guerra ouvindo vozes que ningu\xE9m mais ouve."
+  lore: "Ex-soldado da Legi\xE3o Estrangeira. Voltou do front com uma cicatriz no peito e vozes que ningu\xE9m mais ouve. Hoje empunha o sabre pela Ordo Realitas, certo de que algumas coisas s\xF3 param quando sangram."
   portrait: {fileID: 0}
   themeColor: {r: 0.6, g: 0.1, b: 0.12, a: 1}
   trilha: 0

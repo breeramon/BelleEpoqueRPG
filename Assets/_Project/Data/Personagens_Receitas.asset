@@ -56,21 +56,24 @@ MonoBehaviour:
     die: Death01
   - nome: Irma_Celeste
     ficha: {fileID: 11400000, guid: 7341f6643d2974b4f985c5cd1da16d7c, type: 2}
-    roupa: Female_Ranger.fbx
+    roupa: Female_Peasant.fbx
     corpo: Superhero_Female_FullBody.fbx
-    cabelos: []
-    roupaTextura: T_Ranger_BaseColor.png
-    roupaTom: {r: 0.55, g: 0.55, b: 0.62, a: 1}
+    cabelos:
+    - Eyebrows_Female.fbx
+    - Hair_SimpleParted.fbx
+    - Hair_Buns.fbx
+    roupaTextura: T_Peasant_2_BaseColor.png
+    roupaTom: {r: 0.3333333, g: 0.3333333, b: 0.3333333, a: 1}
     olhosTom: {r: 1, g: 1, b: 1, a: 1}
     fantasma: 0
     corPrincipal: {r: 0.86, g: 0.8, b: 0.72, a: 1}
     corJuntas: {r: 0.22, g: 0.17, b: 0.15, a: 1}
-    idle: Idle_Lantern_Loop
-    attack: Melee_Hook
+    idle: Pistol_Idle_Loop
+    attack: Pistol_Shoot
     cast: Spell_Simple_Shoot
     heal: Spell_Simple_Enter
     hit: Hit_Chest
-    defend: Sword_Block
+    defend: Shield_OneShot
     item: Consume
     die: Death01
   - nome: Cultista_Encapuzado
